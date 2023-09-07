@@ -45,3 +45,5 @@ python3 release_the_hounds.py -l ./bloodhounddata/
 You have two options to authenticate to the API:
   1. Configure your domain & token info in `constants.py`
   2. Specify in the command line
+
+![Release the Hounds](https://media.giphy.com/media/fveEm9uqUas7igLGTU/giphy.gif)
