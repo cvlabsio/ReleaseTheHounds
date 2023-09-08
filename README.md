@@ -47,6 +47,31 @@ python3 ReleaseTheHounds -l <BHCE-SharpHound-zip-file>
 Provide the file location (`-l`) of eitha a SharpHound `.zip` file (in which case it will be extracted) or a directory with already-extracted JSON files.
 
 ```bash
+# Usage
+$ python3 release_the_hounds.py -h
+usage: release_the_hounds.py [-h] -l LOCATION [-u URL] [-k TOKENKEY] [-i TOKENID] [-c CHUNKOBJECTS] [-j CHUNKSINJOB]
+
+Process JSON files in chunks for BHCE and upload via API.
+
+options:
+  -h, --help            show this help message and exit
+  -l LOCATION, --location LOCATION
+                        File system location (zip file or recursively for a directory) of JSON files. Will unzip if needed.
+  -u URL, --url URL     [Can be specified in constants.py.] Base API URL to connect to. Ex. https://bloodhound.absalom.net:443
+  -k TOKENKEY, --tokenkey TOKENKEY
+                        [Can be specified in constants.py.] BloodHound token key (Looks like a B64 blob:
+                        https://support.bloodhoundenterprise.io/hc/en-us/articles/11311053342619-Working-with-the-BloodHound-
+                        API#heading-2)
+  -i TOKENID, --tokenid TOKENID
+                        BloodHound token ID (Looks like a GUID: https://support.bloodhoundenterprise.io/hc/en-
+                        us/articles/11311053342619-Working-with-the-BloodHound-API#heading-2)
+  -c CHUNKOBJECTS, --chunkobjects CHUNKOBJECTS
+                        Number of objects in each chunk (default: 250)
+  -j CHUNKSINJOB, --chunksinjob CHUNKSINJOB
+                        Number of chunks in each job (default: 50)
+```
+
+```bash
 ## Just specify the zip
 ls *.zip
 python3 release_the_hounds.py -l bh.zip
