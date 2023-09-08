@@ -5,6 +5,7 @@ import zipfile, os
 
 from lib.api import *
 from lib.constants import *
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Process JSON files in chunks for BHCE and upload via API.")    
