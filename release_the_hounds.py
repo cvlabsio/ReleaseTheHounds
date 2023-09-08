@@ -3,8 +3,8 @@
 import argparse
 import zipfile, os
 
-from api import *
-from constants import *
+from lib.api import *
+from lib.constants import *
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Process JSON files in chunks for BHCE and upload via API.")    
