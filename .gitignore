@@ -3,3 +3,5 @@
 
 # Ignore my creds file so it doesn't upload with git commits
 /lib/constants.py
+constants.py
+./lib/constants.py
