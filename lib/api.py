@@ -220,18 +220,26 @@ class Client(object):
             return
 
 
-    def query_attack_path(self, src_sid, dst_sid, relationships_exclude="none") -> dict:
+    def query_attack_path(self, src_sid, dst_sid, exclude_relationships="") -> dict:
         '''
         Query the shortest path from source to destination
         '''
-        encoded_query = f'start_node={src_sid}&end_node={dst_sid}&relationship_kinds=in:Contains,GPLink,HasSIDHistory,MemberOf,TrustedBy,AdminTo,AllowedToAct,AllowedToDelegate,CanPSRemote,CanRDP,ExecuteDCOM,SQLAdmin,DCSync,DumpSMSAPassword,HasSession,ReadGMSAPassword,ReadLAPSPassword,SyncLAPSPassword,AddMember,AddSelf,AllExtendedRights,ForceChangePassword,GenericAll,Owns,GenericWrite,WriteDacl,WriteOwner,AddAllowedToAct,AddKeyCredentialLink,WriteAccountRestrictions,WriteSPN,AZAppAdmin,AZCloudAppAdmin,AZContains,AZGlobalAdmin,AZHasRole,AZManagedIdentity,AZMemberOf,AZNodeResourceGroup,AZPrivilegedAuthAdmin,AZPrivilegedRoleAdmin,AZRunsAs,AZAddMembers,AZAddOwner,AZAddSecret,AZExecuteCommand,AZGrant,AZGrantSelf,AZOwns,AZResetPassword,AZMGAddMember,AZMGAddOwner,AZMGAddSecret,AZMGGrantAppRoles,AZMGGrantAppRoles,AZGetCertificates,AZGetKeys,AZGetSecrets,AZAvereContributor,AZKeyVaultContributor,AZOwner,AZContributor,AZUserAccessAdministrator,AZVMAdminLogin,AZVMContributor,AZAKSContributor,AZAutomationContributor,AZLogicAppContributor,AZWebsiteContributor'
-        r = self._request('GET', f'/api/v2/graphs/shortest-path?{encoded_query}')
+        # Default queries every possible edge
+        exclude_list = exclude_relationships.split(',')
+        exclude_list_lower = [r.lower() for r in exclude_list]
+        relationships_included = [r for r in RELATIONSHIPS if r.lower() not in exclude_list]
+        query = f'start_node={src_sid}&end_node={dst_sid}&relationship_kinds=in:'
+        for i,r in enumerate(relationships_included):   # Formulate list of all relationships
+            query += r
+            query += ',' if i < len(relationships_included) - 1 else ''
+        print(query)
+        r = self._request('GET', f'/api/v2/graphs/shortest-path?{query}')
         if r.status_code == 200:
             # Request was successful. Returns 200 if there's a result or not
             return r.json()
         else:
             print(f'[!] Request failed with a {r.status_code}! Behavior will be unexpected...')
-            return
+            return r.json()
 
 
     def chunk_and_submit_data(self, data_to_chunk, num_objs_in_chunk=250, num_chunks_per_job=50):
@@ -302,7 +310,7 @@ class Client(object):
         return
 
     
-    def get_attack_paths(self, source, destination, exclude_relationships=None):
+    def get_attack_paths(self, source, destination, exclude_relationships=""):
         '''
         Takes a source node and identifies attack paths to destination node.
             - Determine if you need to load source from files
@@ -339,12 +347,12 @@ class Client(object):
         print(f'[*] Found destination {search_results_dst["data"][0]["type"]} "{search_results_dst["data"][0]["name"]}" with SID "{dst_sid}" for: "{destination}"')
 
         ## Query the shortest path!!
-
-        # Default queries every possible edge
-        relationships_included = [r for r in RELATIONSHIPS if r.lower() != exclude_relationship.lower()]  
         print(f'{BOLD}{RED}[*] <-=-=-=-=-=-=-=-=-=-=-=- QUERYING ATTACK PATHS -=-==-=-=-=-=-=--=-=-=->{RESET}')
-        shortest_path_results = self.query_attack_path(src_sid, dst_sid)
-        path_data = shortest_path_results['data']
+        shortest_path_results = self.query_attack_path(src_sid, dst_sid, exclude_relationships)
+        try:
+            path_data = shortest_path_results['data']
+        except:
+            print(f'[-] No attack paths found!')
         print(f'{BOLD}{MAGENTA}[{path_data["nodes"][path_data["edges"][0]["source"]]["label"]}]{RESET} ', end='')
         for edge in path_data['edges']:
             print(f'{BOLD}{CYAN}<{edge["kind"]}>{RESET} ', end='')
