@@ -27,6 +27,7 @@ def parse_args():
     query_parser.add_argument('-i', '--tokenid', type=str, help='BloodHound token ID  (Looks like a GUID: https://support.bloodhoundenterprise.io/hc/en-us/articles/11311053342619-Working-with-the-BloodHound-API#heading-2)')
     query_parser.add_argument('-s', '--source', type=str, help='Source node as a single user (e.g., "jasper@absalom.org") or a file of source nodes to query')
     query_parser.add_argument('-d', '--dest', type=str, help='Destination node as a single object (e.g., "Domain Admins@absalom.org")')
+    query_parser.add_argument('-x', '--exclude', type=str, default= "", help='Comma-separated list of relationships to exclude (e.g. "CanRDP,CanPSRemote"')
     
     return parser.parse_args()
     
@@ -175,7 +176,7 @@ def main():
             client.chunk_and_submit_data(data_to_chunk=bhjson, num_objs_in_chunk=chunk_object_count, num_chunks_per_job=num_chunks_per_job)
     ### QUERYING THE API FOR ATTACK PATHS ##
     elif args.action == 'query':
-        client.get_attack_paths(args.source, args.dest)
+        client.get_attack_paths(args.source, args.dest, args.exclude)
 
 
 if __name__ == "__main__":

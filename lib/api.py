@@ -232,7 +232,7 @@ class Client(object):
         for i,r in enumerate(relationships_included):   # Formulate list of all relationships
             query += r
             query += ',' if i < len(relationships_included) - 1 else ''
-        print(query)
+        #print(query)       # DEBUG
         r = self._request('GET', f'/api/v2/graphs/shortest-path?{query}')
         if r.status_code == 200:
             # Request was successful. Returns 200 if there's a result or not
