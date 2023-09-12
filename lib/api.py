@@ -4,6 +4,7 @@ import hashlib
 import base64
 import json
 import requests, urllib3
+import urllib.parse
 import datetime, time
 
 from typing import Optional
@@ -194,7 +195,9 @@ class Client(object):
         '''
         Searches for an object and returns a blob including the SID, objtype, UPN, and DN
         '''
-        r = self._request('GET', f'/api/v2/search?q={searchobj}')
+        encoded_query = urllib.parse.quote(searchobj)
+        print(f'[*] Searching for {searchobj}, URL-encoded: "{encoded_query}"')
+        r = self._request('GET', f'/api/v2/search?q={encoded_query}')
         if r.status_code == 200:
             # Request was successful. Returns 200 if there's a result or not
             return r.json()
@@ -280,7 +283,27 @@ class Client(object):
                 - Query for attack paths & return results
         '''
         print(f'[*] Getting paths to {destination}')
-        results = self.object_search(source)
-        print(results)
+        # Find SID for source
+        search_results_src = self.object_search(source)
+        if len(search_results_src['data']) == 0:
+            print(f'[-] Searching for {source} failed - No results! Try again.')
+            exit()
+        elif len(search_results_src['data']) > 1:
+            print(f'[!] Searching for {source} yielded more than 1 result! Results may be unstable.')
+        src_sid = search_results_src["data"][0]["objectid"]
+        print(f'[*] Found source user "{search_results_src["data"][0]["name"]}" with SID "{src_sid}" for: "{source}"')
+
+        search_results_dst = self.object_search(destination)
+        if len(search_results_dst['data']) == 0:
+            print(f'[-] Searching for {destination} failed - No results! Try again.')
+            exit()
+        elif len(search_results_dst['data']) > 1:
+            print(f'[!] Searching for {destination} yielded more than 1 result! Results may be unstable.')
+        dst_sid = search_results_dst["data"][0]["objectid"]
+        print(f'[*] Found destination object "{search_results_dst["data"][0]["name"]}" with SID "{dst_sid}" for: "{destination}"')
+               
+        
 
         return
+
+
