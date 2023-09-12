@@ -220,14 +220,14 @@ class Client(object):
             return
 
 
-    def query_attack_path(self, src_sid, dst_sid, exclude_relationships="") -> dict:
+    def query_attack_path(self, src_sid, dst_sid, exclude_relationships) -> dict:
         '''
         Query the shortest path from source to destination
         '''
         # Default queries every possible edge
         exclude_list = exclude_relationships.split(',')
         exclude_list_lower = [r.lower() for r in exclude_list]
-        relationships_included = [r for r in RELATIONSHIPS if r.lower() not in exclude_list]
+        relationships_included = [r for r in RELATIONSHIPS if r.lower() not in exclude_list_lower]
         query = f'start_node={src_sid}&end_node={dst_sid}&relationship_kinds=in:'
         for i,r in enumerate(relationships_included):   # Formulate list of all relationships
             query += r
@@ -310,7 +310,7 @@ class Client(object):
         return
 
     
-    def get_attack_paths(self, source, destination, exclude_relationships=""):
+    def get_attack_paths(self, source, destination, exclude_relationships):
         '''
         Takes a source node and identifies attack paths to destination node.
             - Determine if you need to load source from files
@@ -351,13 +351,13 @@ class Client(object):
         shortest_path_results = self.query_attack_path(src_sid, dst_sid, exclude_relationships)
         try:
             path_data = shortest_path_results['data']
+            print(f'{BOLD}{MAGENTA}[{path_data["nodes"][path_data["edges"][0]["source"]]["label"]}]{RESET} ', end='')
+            for edge in path_data['edges']:
+                print(f'{BOLD}{CYAN}<{edge["kind"]}>{RESET} ', end='')
+                print(f'{MAGENTA}[{path_data["nodes"][edge["target"]]["label"]}]{RESET} ', end='')
+            print('')   # Get fresh line to clear it
         except:
             print(f'[-] No attack paths found!')
-        print(f'{BOLD}{MAGENTA}[{path_data["nodes"][path_data["edges"][0]["source"]]["label"]}]{RESET} ', end='')
-        for edge in path_data['edges']:
-            print(f'{BOLD}{CYAN}<{edge["kind"]}>{RESET} ', end='')
-            print(f'{MAGENTA}[{path_data["nodes"][edge["target"]]["label"]}]{RESET} ', end='')
-        print('')   # Get fresh line to clear it
 
         print('')
         return
