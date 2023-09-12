@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-### ReleaseTheHounds.py ###
+### release_the_hounds.py ###
 import argparse
 import zipfile, os
 
@@ -9,12 +9,24 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Process JSON files in chunks for BHCE and upload via API.")    
-    parser.add_argument('-l', '--location', required=True, help='File system location (zip file or recursively for a directory) of JSON files. Will unzip if needed.')
-    parser.add_argument('-u', '--url', type=str, help='[Can be specified in constants.py.] Base API URL to connect to. Ex. https://bloodhound.absalom.net:443')
-    parser.add_argument('-k', '--tokenkey', type=str, help='[Can be specified in constants.py.] BloodHound token key  (Looks like a B64 blob: https://support.bloodhoundenterprise.io/hc/en-us/articles/11311053342619-Working-with-the-BloodHound-API#heading-2)')
-    parser.add_argument('-i', '--tokenid', type=str, help='BloodHound token ID  (Looks like a GUID: https://support.bloodhoundenterprise.io/hc/en-us/articles/11311053342619-Working-with-the-BloodHound-API#heading-2)')
-    parser.add_argument('-c', '--chunkobjects', type=int, default=250, help='Number of objects in each chunk (default: 250)')
-    parser.add_argument('-j', '--chunksinjob', type=int, default=50, help='Number of chunks in each job (default: 50)')
+    subparsers = parser.add_subparsers(dest="action", help="Choose an action: 'upload' or 'query'")
+
+    # Subparser for "upload" action
+    upload_parser = subparsers.add_parser("upload", help="Upload data to BHCE.")
+    upload_parser.add_argument('-l', '--location', required=True, help='File system location (zip file or recursively for a directory) of JSON files. Will unzip if needed.')
+    upload_parser.add_argument('-u', '--url', type=str, help='[Can be specified in constants.py.] Base API URL to connect to. Ex. https://bloodhound.absalom.net:443')
+    upload_parser.add_argument('-k', '--tokenkey', type=str, help='[Can be specified in constants.py.] BloodHound token key  (Looks like a B64 blob: https://support.bloodhoundenterprise.io/hc/en-us/articles/11311053342619-Working-with-the-BloodHound-API#heading-2)')
+    upload_parser.add_argument('-i', '--tokenid', type=str, help='BloodHound token ID  (Looks like a GUID: https://support.bloodhoundenterprise.io/hc/en-us/articles/11311053342619-Working-with-the-BloodHound-API#heading-2)')
+    upload_parser.add_argument('-c', '--chunkobjects', type=int, default=250, help='Number of objects in each chunk (default: 250)')
+    upload_parser.add_argument('-j', '--chunksinjob', type=int, default=50, help='Number of chunks in each job (default: 50)')
+
+    # Subparser for "query" action
+    query_parser = subparsers.add_parser("query", help="Query BloodHound for attack paths. Takes in source and destination nodes.")
+    query_parser.add_argument('-u', '--url', type=str, help='[Can be specified in constants.py.] Base API URL to connect to. Ex. https://bloodhound.absalom.net:443')
+    query_parser.add_argument('-k', '--tokenkey', type=str, help='[Can be specified in constants.py.] BloodHound token key  (Looks like a B64 blob: https://support.bloodhoundenterprise.io/hc/en-us/articles/11311053342619-Working-with-the-BloodHound-API#heading-2)')
+    query_parser.add_argument('-i', '--tokenid', type=str, help='BloodHound token ID  (Looks like a GUID: https://support.bloodhoundenterprise.io/hc/en-us/articles/11311053342619-Working-with-the-BloodHound-API#heading-2)')
+    query_parser.add_argument('-s', '--source-node', type=str, help='Source node as a single user (e.g., "jasper@absalom.org") or a file of source nodes to query')
+    query_parser.add_argument('-d', '--dest-node', type=str, help='Destination node as a single entity (e.g., "Domain Admins@absalom.org")')
     
     return parser.parse_args()
     
@@ -24,8 +36,8 @@ def banner():
 
           __________       .__                                  
           \______   \ ____ |  |   ____ _____    ______ ____   
-           |       __/ __ \|  | _/ __ \\__  \  /  ____/ __ \  
-           |    |   \  ___/|  |_\  ___/ / __ \_\___ \\  ___/  
+           |       __/ __ \|  | _/ __ \\\\__  \  /  ____/ __ \  
+           |    |   \  ___/|  |_\  ___/ / __ \_\___ \\\\  ___/  
            |____|_  /\___  |____/\___  (____  /____  >\___  > 
                   \/     \/          \/     \/     \/     \/  
       __  .__               ___ ___                         .___      
@@ -103,8 +115,18 @@ def load_file(filename) -> dict:
 
 
 def main():
+    banner()
     # Set up args
     args = parse_args()
+
+    if args.action == "upload":
+        print('[*] Uploading files to BHCE.')
+    elif args.action == "query":
+        print('[*] Querying BHCE.')
+    else:
+        print('[-] Must have an action specified!')
+        exit()
+
     if args.tokenid:
         BHCE_TOKEN_ID  = args.tokenid
     else:
@@ -131,7 +153,6 @@ def main():
     # Configure Credentials object for auth
     credentials = Credentials(token_id=BHCE_TOKEN_ID, token_key=BHCE_TOKEN_KEY)
 
-    banner()
 
     # Create the client and perform a sample call using token request signing
     print("<#######################################################################>")
@@ -148,12 +169,12 @@ def main():
         exit()
 
     ### UPLOADING DATA TO API ###
-    
-    files = extract_zip(args.location) if args.location.endswith('.zip') else list_files_in_directory(args.location)
-    for f in files:
-        print(f'[*] LOADING SHARPHOUND DATA FILE: {f} -->')
-        bhjson = load_file(f) 
-        client.chunk_and_submit_data(data_to_chunk=bhjson, num_objs_in_chunk=chunk_object_count, num_chunks_per_job=num_chunks_per_job)
+    if args.action == 'upload':    
+        files = extract_zip(args.location) if args.location.endswith('.zip') else list_files_in_directory(args.location)
+        for f in files:
+            print(f'[*] LOADING SHARPHOUND DATA FILE: {f} -->')
+            bhjson = load_file(f) 
+            client.chunk_and_submit_data(data_to_chunk=bhjson, num_objs_in_chunk=chunk_object_count, num_chunks_per_job=num_chunks_per_job)
 
 
 if __name__ == "__main__":
