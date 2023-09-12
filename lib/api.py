@@ -302,7 +302,7 @@ class Client(object):
         return
 
     
-    def get_attack_paths(self, source, destination):
+    def get_attack_paths(self, source, destination, exclude_relationships=None):
         '''
         Takes a source node and identifies attack paths to destination node.
             - Determine if you need to load source from files
@@ -341,7 +341,7 @@ class Client(object):
         ## Query the shortest path!!
 
         # Default queries every possible edge
-        #relationships_included = [r for r in RELATIONSHIPS if r.lower() != exclude_relationship.lower()]  
+        relationships_included = [r for r in RELATIONSHIPS if r.lower() != exclude_relationship.lower()]  
         print(f'{BOLD}{RED}[*] <-=-=-=-=-=-=-=-=-=-=-=- QUERYING ATTACK PATHS -=-==-=-=-=-=-=--=-=-=->{RESET}')
         shortest_path_results = self.query_attack_path(src_sid, dst_sid)
         path_data = shortest_path_results['data']
