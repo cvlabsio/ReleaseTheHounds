@@ -120,9 +120,9 @@ def main():
     args = parse_args()
 
     if args.action == "upload":
-        print('[*] Uploading files to BHCE.')
+        print('[*] Uploading files to BHCE!')
     elif args.action == "query":
-        print('[*] Querying BHCE.')
+        print('[*] Querying BHCE for attack paths!')
     else:
         print('[-] Must have an action specified!')
         exit()
@@ -151,8 +151,8 @@ def main():
     # Configure Credentials object for auth
     credentials = Credentials(token_id=BHCE_TOKEN_ID, token_key=BHCE_TOKEN_KEY)
     # Create the client and perform a sample call using token request signing
-    print("<#######################################################################>")
-    print("<-=-=-=-=-=-=-=-=- Initiating the BloodHound CE client -=-=-=-=-=-=-=-=->")
+    print("[*] #######################################################################")
+    print("[*] -=-=-=-=-=-=-=-=- Initiating the BloodHound CE client -=-=-=-=-=-=-=-=-")
     print(f'[*] Connecting to: {BHCE_SCHEME}://{BHCE_DOMAIN}:{BHCE_PORT}')
     client = Client(scheme=BHCE_SCHEME, host=BHCE_DOMAIN, port=BHCE_PORT, credentials=credentials)
 
@@ -176,7 +176,6 @@ def main():
             client.chunk_and_submit_data(data_to_chunk=bhjson, num_objs_in_chunk=chunk_object_count, num_chunks_per_job=num_chunks_per_job)
     ### QUERYING THE API FOR ATTACK PATHS ##
     elif args.action == 'query':
-        print(f'[*] Querying attack paths from "{args.source}" to "{args.dest}"')
         client.get_attack_paths(args.source, args.dest)
 
 
