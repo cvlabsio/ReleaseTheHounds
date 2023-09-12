@@ -177,6 +177,7 @@ def main():
     ### QUERYING THE API FOR ATTACK PATHS ##
     elif args.action == 'query':
         print(f'[*] Querying attack paths from "{args.source}" to "{args.dest}"')
+        client.get_attack_paths(args.source, args.dest)
 
 
 if __name__ == "__main__":
