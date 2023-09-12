@@ -351,6 +351,7 @@ class Client(object):
         shortest_path_results = self.query_attack_path(src_sid, dst_sid, exclude_relationships)
         try:
             path_data = shortest_path_results['data']
+            print(f'[+] Attack path found for {path_data["nodes"][path_data["edges"][0]["source"]]["label"]}!')
             print(f'{BOLD}{MAGENTA}[{path_data["nodes"][path_data["edges"][0]["source"]]["label"]}]{RESET} ', end='')
             for edge in path_data['edges']:
                 print(f'{BOLD}{CYAN}<{edge["kind"]}>{RESET} ', end='')
