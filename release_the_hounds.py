@@ -48,7 +48,7 @@ def banner():
                \/     \/         \/                   \/     \/    \/ 
 
     '''
-    print(f'{RED}{banner}{RESET}')
+    print(f'{BOLD}{RED}{banner}{RESET}')
     
     return
     
@@ -160,7 +160,6 @@ def main():
     try:
         version = client.get_version()
         print(f'[+] Successfully authenticated to the API! Version: {version.api_version} - Server version: {version.server_version}')
-        print("")
     except:
         print('[-] Failed to authenticate to the target API. Exiting ...')
         exit()
