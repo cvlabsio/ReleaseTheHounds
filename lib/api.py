@@ -27,6 +27,7 @@ BLUE    = '\033[34m'
 MAGENTA = '\033[35m'
 CYAN    = '\033[36m'
 WHITE   = '\033[37m'
+BOLD    = '\033[1m'  # Text style for bold
 RESET   = '\033[0m'  # Reset the color to the default
 
 
@@ -323,7 +324,6 @@ class Client(object):
                 print(f'        Distinguished Name:   {r["distinguishedname"]}')
         src_sid = search_results_src["data"][0]["objectid"]
         print(f'[*] Found source {search_results_src["data"][0]["type"]} "{search_results_src["data"][0]["name"]}" with SID "{src_sid}" for: "{source}"')
-        print('')
 
         search_results_dst = self.object_search(destination)
         if len(search_results_dst['data']) == 0:
@@ -337,20 +337,20 @@ class Client(object):
                 print(f'        Distinguished Name:   {r["distinguishedname"]}')
         dst_sid = search_results_dst["data"][0]["objectid"]
         print(f'[*] Found destination {search_results_dst["data"][0]["type"]} "{search_results_dst["data"][0]["name"]}" with SID "{dst_sid}" for: "{destination}"')
-        print('')
 
         ## Query the shortest path!!
 
         # Default queries every possible edge
         #relationships_included = [r for r in RELATIONSHIPS if r.lower() != exclude_relationship.lower()]  
-        print(f'[*] <=-=-=- QUERYING ATTACK PATHS -=-=-=>')
+        print(f'{BOLD}{RED}[*] <-=-=-=-=-=-=-=-=-=-=-=- QUERYING ATTACK PATHS -=-==-=-=-=-=-=--=-=-=->{RESET}')
         shortest_path_results = self.query_attack_path(src_sid, dst_sid)
         path_data = shortest_path_results['data']
-        print(f'{MAGENTA}[{path_data["nodes"][path_data["edges"][0]["source"]]["label"]}]{RESET} ', end='')
+        print(f'{BOLD}{MAGENTA}[{path_data["nodes"][path_data["edges"][0]["source"]]["label"]}]{RESET} ', end='')
         for edge in path_data['edges']:
-            print(f'{CYAN}<{edge["kind"]}>{RESET} ', end='')
+            print(f'{BOLD}{CYAN}<{edge["kind"]}>{RESET} ', end='')
             print(f'{MAGENTA}[{path_data["nodes"][edge["target"]]["label"]}]{RESET} ', end='')
-        print('')   # Get fresh line
+        print('')   # Get fresh line to clear it
 
+        print('')
         return
 
