@@ -10,12 +10,13 @@ import datetime, time
 from typing import Optional
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
-PRINT_PRINCIPALS = False
+PRINT_PRINCIPALS   = False
 PRINT_ATTACK_PATH_TIMELINE_DATA = False
 PRINT_POSTURE_DATA = False
 
-DATA_START = "1970-01-01T00:00:00.000Z"
-DATA_END = datetime.datetime.now(datetime.timezone.utc).strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3] + 'Z' # Now
+DATA_START      = "1970-01-01T00:00:00.000Z"
+DATA_END        = datetime.datetime.now(datetime.timezone.utc).strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3] + 'Z' # Now
+RELATIONSHIPS   = ["Contains","GPLink","HasSIDHistory","MemberOf","TrustedBy","AdminTo","AllowedToAct","AllowedToDelegate","CanPSRemote","CanRDP","ExecuteDCOM","SQLAdmin","DCSync","DumpSMSAPassword","HasSession","ReadGMSAPassword","ReadLAPSPassword","SyncLAPSPassword","AddMember","AddSelf","AllExtendedRights","ForceChangePassword","GenericAll","Owns","GenericWrite","WriteDacl","WriteOwner","AddAllowedToAct","AddKeyCredentialLink","WriteAccountRestrictions","WriteSPN","AZAppAdmin","AZCloudAppAdmin","AZContains","AZGlobalAdmin","AZHasRole","AZManagedIdentity","AZMemberOf","AZNodeResourceGroup","AZPrivilegedAuthAdmin","AZPrivilegedRoleAdmin","AZRunsAs","AZAddMembers","AZAddOwner","AZAddSecret","AZExecuteCommand","AZGrant","AZGrantSelf","AZOwns","AZResetPassword","AZMGAddMember","AZMGAddOwner","AZMGAddSecret","AZMGGrantAppRoles","AZMGGrantAppRoles","AZGetCertificates","AZGetKeys","AZGetSecrets","AZAvereContributor","AZKeyVaultContributor","AZOwner","AZContributor","AZUserAccessAdministrator","AZVMAdminLogin","AZVMContributor","AZAKSContributor","AZAutomationContributor","AZLogicAppContributor","AZWebsiteContributor"]
 
 class Credentials(object):
     def __init__(self, token_id: str, token_key: str) -> None:
@@ -206,6 +207,20 @@ class Client(object):
             return
 
 
+    def query_attack_path(self, src_sid, dst_sid, relationships_exclude="none") -> dict:
+        '''
+        Query the shortest path from source to destination
+        '''
+        encoded_query = f'start_node={src_sid}&end_node={dst_sid}&relationship_kinds=in:Contains,GPLink,HasSIDHistory,MemberOf,TrustedBy,AdminTo,AllowedToAct,AllowedToDelegate,CanPSRemote,CanRDP,ExecuteDCOM,SQLAdmin,DCSync,DumpSMSAPassword,HasSession,ReadGMSAPassword,ReadLAPSPassword,SyncLAPSPassword,AddMember,AddSelf,AllExtendedRights,ForceChangePassword,GenericAll,Owns,GenericWrite,WriteDacl,WriteOwner,AddAllowedToAct,AddKeyCredentialLink,WriteAccountRestrictions,WriteSPN,AZAppAdmin,AZCloudAppAdmin,AZContains,AZGlobalAdmin,AZHasRole,AZManagedIdentity,AZMemberOf,AZNodeResourceGroup,AZPrivilegedAuthAdmin,AZPrivilegedRoleAdmin,AZRunsAs,AZAddMembers,AZAddOwner,AZAddSecret,AZExecuteCommand,AZGrant,AZGrantSelf,AZOwns,AZResetPassword,AZMGAddMember,AZMGAddOwner,AZMGAddSecret,AZMGGrantAppRoles,AZMGGrantAppRoles,AZGetCertificates,AZGetKeys,AZGetSecrets,AZAvereContributor,AZKeyVaultContributor,AZOwner,AZContributor,AZUserAccessAdministrator,AZVMAdminLogin,AZVMContributor,AZAKSContributor,AZAutomationContributor,AZLogicAppContributor,AZWebsiteContributor'
+        r = self._request('GET', f'/api/v2/graphs/shortest-path?{encoded_query}')
+        if r.status_code == 200:
+            # Request was successful. Returns 200 if there's a result or not
+            return r.json()
+        else:
+            print(f'[!] Request failed with a {r.status_code}! Behavior will be unexpected...')
+            return
+
+
     def chunk_and_submit_data(self, data_to_chunk, num_objs_in_chunk=250, num_chunks_per_job=50):
         '''
         Takes a large JSON blob loaded from load_file:
@@ -312,6 +327,18 @@ class Client(object):
         print(f'[*] Found destination {search_results_dst["data"][0]["type"]} "{search_results_dst["data"][0]["name"]}" with SID "{dst_sid}" for: "{destination}"')
         print('')
 
-        return
+        ## Query the shortest path!!
 
+        # Default queries every possible edge
+        #relationships_included = [r for r in RELATIONSHIPS if r.lower() != exclude_relationship.lower()]  
+        shortest_path_results = self.query_attack_path(src_sid, dst_sid)
+        #print(shortest_path_results)    # DEBUG
+        path_data = shortest_path_results['data']
+        print(f'[{path_data["nodes"][path_data["edges"][0]["source"]]["label"]}] ', end='')
+        for edge in path_data['edges']:
+            print(f'<{edge["kind"]}> ', end='')
+            print(f'[{path_data["nodes"][edge["target"]]["label"]}] ', end='')
+        print('')   # Get fresh line
+
+        return
 
