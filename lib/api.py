@@ -190,6 +190,19 @@ class Client(object):
         return
         
     
+    def object_search(self, searchobj) -> dict:
+        '''
+        Searches for an object and returns a blob including the SID, objtype, UPN, and DN
+        '''
+        r = self._request('GET', f'/api/v2/search?q={searchobj}')
+        if r.status_code == 200:
+            # Request was successful. Returns 200 if there's a result or not
+            return r.json()
+        else:
+            print(f'[!] Request failed with a {r.status_code}! Behavior will be unexpected...')
+            return
+
+
     def chunk_and_submit_data(self, data_to_chunk, num_objs_in_chunk=250, num_chunks_per_job=50):
         '''
         Takes a large JSON blob loaded from load_file:
@@ -255,4 +268,19 @@ class Client(object):
         self.stop_job(job_id) 
         self.wait_for_job_to_finish(job_id)   
         print(f'[+] Uploaded {chunk_count} chunks of {num_objs_in_chunk} objects each to API.')
+        return
+
+    
+    def get_attack_paths(self, source, destination):
+        '''
+        Takes a source node and identifies attack paths to destination node.
+            - Determine if you need to load source from files
+            - For each source
+                - Resolve the SID with "search" API for source/dest
+                - Query for attack paths & return results
+        '''
+        print(f'[*] Getting paths to {destination}')
+        results = self.object_search(source)
+        print(results)
+
         return
