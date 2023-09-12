@@ -196,7 +196,7 @@ class Client(object):
         Searches for an object and returns a blob including the SID, objtype, UPN, and DN
         '''
         encoded_query = urllib.parse.quote(searchobj)
-        print(f'[*] Searching for {searchobj}, URL-encoded: "{encoded_query}"')
+        #print(f'[*] Searching for {searchobj}, URL-encoded: "{encoded_query}"')    # DEBUG
         r = self._request('GET', f'/api/v2/search?q={encoded_query}')
         if r.status_code == 200:
             # Request was successful. Returns 200 if there's a result or not
@@ -289,20 +289,28 @@ class Client(object):
             print(f'[-] Searching for {source} failed - No results! Try again.')
             exit()
         elif len(search_results_src['data']) > 1:
-            print(f'[!] Searching for {source} yielded more than 1 result! Results may be unstable.')
+            print(f'[*] Searching for {source} yielded more than 1 result! Using first: {search_results_src["data"][0]["name"]}')
+            print(f'    All matches:')
+            for r in search_results_src['data']:
+                print(f'        Name:                 {r["name"]}')
+                print(f'        Distinguished Name:   {r["distinguishedname"]}')
         src_sid = search_results_src["data"][0]["objectid"]
-        print(f'[*] Found source user "{search_results_src["data"][0]["name"]}" with SID "{src_sid}" for: "{source}"')
+        print(f'[*] Found source {search_results_src["data"][0]["type"]} "{search_results_src["data"][0]["name"]}" with SID "{src_sid}" for: "{source}"')
+        print('')
 
         search_results_dst = self.object_search(destination)
         if len(search_results_dst['data']) == 0:
             print(f'[-] Searching for {destination} failed - No results! Try again.')
             exit()
         elif len(search_results_dst['data']) > 1:
-            print(f'[!] Searching for {destination} yielded more than 1 result! Results may be unstable.')
+            print(f'[*] Search yielded more than 1 result! Using first: {search_results_dst["data"][0]["name"]}')
+            print(f'    All matches:')
+            for r in search_results_dst['data']:
+                print(f'        Name:                 {r["name"]}')
+                print(f'        Distinguished Name:   {r["distinguishedname"]}')
         dst_sid = search_results_dst["data"][0]["objectid"]
-        print(f'[*] Found destination object "{search_results_dst["data"][0]["name"]}" with SID "{dst_sid}" for: "{destination}"')
-               
-        
+        print(f'[*] Found destination {search_results_dst["data"][0]["type"]} "{search_results_dst["data"][0]["name"]}" with SID "{dst_sid}" for: "{destination}"')
+        print('')
 
         return
 
