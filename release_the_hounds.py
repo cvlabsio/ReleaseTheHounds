@@ -25,8 +25,8 @@ def parse_args():
     query_parser.add_argument('-u', '--url', type=str, help='[Can be specified in constants.py.] Base API URL to connect to. Ex. https://bloodhound.absalom.net:443')
     query_parser.add_argument('-k', '--tokenkey', type=str, help='[Can be specified in constants.py.] BloodHound token key  (Looks like a B64 blob: https://support.bloodhoundenterprise.io/hc/en-us/articles/11311053342619-Working-with-the-BloodHound-API#heading-2)')
     query_parser.add_argument('-i', '--tokenid', type=str, help='BloodHound token ID  (Looks like a GUID: https://support.bloodhoundenterprise.io/hc/en-us/articles/11311053342619-Working-with-the-BloodHound-API#heading-2)')
-    query_parser.add_argument('-s', '--source-node', type=str, help='Source node as a single user (e.g., "jasper@absalom.org") or a file of source nodes to query')
-    query_parser.add_argument('-d', '--dest-node', type=str, help='Destination node as a single entity (e.g., "Domain Admins@absalom.org")')
+    query_parser.add_argument('-s', '--source', type=str, help='Source node as a single user (e.g., "jasper@absalom.org") or a file of source nodes to query')
+    query_parser.add_argument('-d', '--dest', type=str, help='Destination node as a single object (e.g., "Domain Admins@absalom.org")')
     
     return parser.parse_args()
     
@@ -148,17 +148,14 @@ def main():
         BHCE_SCHEME = api_info["BHCE_SCHEME"]
     # End args setup
     
-    chunk_object_count = args.chunkobjects if args.chunkobjects else 250
-    num_chunks_per_job = args.chunksinjob if args.chunksinjob else 50
     # Configure Credentials object for auth
     credentials = Credentials(token_id=BHCE_TOKEN_ID, token_key=BHCE_TOKEN_KEY)
-
-
     # Create the client and perform a sample call using token request signing
     print("<#######################################################################>")
     print("<-=-=-=-=-=-=-=-=- Initiating the BloodHound CE client -=-=-=-=-=-=-=-=->")
     print(f'[*] Connecting to: {BHCE_SCHEME}://{BHCE_DOMAIN}:{BHCE_PORT}')
     client = Client(scheme=BHCE_SCHEME, host=BHCE_DOMAIN, port=BHCE_PORT, credentials=credentials)
+
     print('[*] Testing credentials by getting API version ...')
     try:
         version = client.get_version()
@@ -170,11 +167,16 @@ def main():
 
     ### UPLOADING DATA TO API ###
     if args.action == 'upload':    
+        chunk_object_count = args.chunkobjects if args.chunkobjects else 250
+        num_chunks_per_job = args.chunksinjob if args.chunksinjob else 50
         files = extract_zip(args.location) if args.location.endswith('.zip') else list_files_in_directory(args.location)
         for f in files:
             print(f'[*] LOADING SHARPHOUND DATA FILE: {f} -->')
             bhjson = load_file(f) 
             client.chunk_and_submit_data(data_to_chunk=bhjson, num_objs_in_chunk=chunk_object_count, num_chunks_per_job=num_chunks_per_job)
+    ### QUERYING THE API FOR ATTACK PATHS ##
+    elif args.action == 'query':
+        print(f'[*] Querying attack paths from "{args.source}" to "{args.dest}"')
 
 
 if __name__ == "__main__":
