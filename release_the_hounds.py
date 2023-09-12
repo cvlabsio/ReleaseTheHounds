@@ -48,7 +48,7 @@ def banner():
                \/     \/         \/                   \/     \/    \/ 
 
     '''
-    print(banner)
+    print(f'{RED}{banner}{RESET}')
     
     return
     

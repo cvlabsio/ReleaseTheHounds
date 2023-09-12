@@ -18,6 +18,18 @@ DATA_START      = "1970-01-01T00:00:00.000Z"
 DATA_END        = datetime.datetime.now(datetime.timezone.utc).strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3] + 'Z' # Now
 RELATIONSHIPS   = ["Contains","GPLink","HasSIDHistory","MemberOf","TrustedBy","AdminTo","AllowedToAct","AllowedToDelegate","CanPSRemote","CanRDP","ExecuteDCOM","SQLAdmin","DCSync","DumpSMSAPassword","HasSession","ReadGMSAPassword","ReadLAPSPassword","SyncLAPSPassword","AddMember","AddSelf","AllExtendedRights","ForceChangePassword","GenericAll","Owns","GenericWrite","WriteDacl","WriteOwner","AddAllowedToAct","AddKeyCredentialLink","WriteAccountRestrictions","WriteSPN","AZAppAdmin","AZCloudAppAdmin","AZContains","AZGlobalAdmin","AZHasRole","AZManagedIdentity","AZMemberOf","AZNodeResourceGroup","AZPrivilegedAuthAdmin","AZPrivilegedRoleAdmin","AZRunsAs","AZAddMembers","AZAddOwner","AZAddSecret","AZExecuteCommand","AZGrant","AZGrantSelf","AZOwns","AZResetPassword","AZMGAddMember","AZMGAddOwner","AZMGAddSecret","AZMGGrantAppRoles","AZMGGrantAppRoles","AZGetCertificates","AZGetKeys","AZGetSecrets","AZAvereContributor","AZKeyVaultContributor","AZOwner","AZContributor","AZUserAccessAdministrator","AZVMAdminLogin","AZVMContributor","AZAKSContributor","AZAutomationContributor","AZLogicAppContributor","AZWebsiteContributor"]
 
+# ANSI escape codes for colors
+BLACK   = '\033[30m'
+RED     = '\033[31m'
+GREEN   = '\033[32m'
+YELLOW  = '\033[33m'
+BLUE    = '\033[34m'
+MAGENTA = '\033[35m'
+CYAN    = '\033[36m'
+WHITE   = '\033[37m'
+RESET   = '\033[0m'  # Reset the color to the default
+
+
 class Credentials(object):
     def __init__(self, token_id: str, token_key: str) -> None:
         self.token_id = token_id
@@ -331,13 +343,13 @@ class Client(object):
 
         # Default queries every possible edge
         #relationships_included = [r for r in RELATIONSHIPS if r.lower() != exclude_relationship.lower()]  
+        print(f'[*] <=-=-=- QUERYING ATTACK PATHS -=-=-=>')
         shortest_path_results = self.query_attack_path(src_sid, dst_sid)
-        #print(shortest_path_results)    # DEBUG
         path_data = shortest_path_results['data']
-        print(f'[{path_data["nodes"][path_data["edges"][0]["source"]]["label"]}] ', end='')
+        print(f'{MAGENTA}[{path_data["nodes"][path_data["edges"][0]["source"]]["label"]}]{RESET} ', end='')
         for edge in path_data['edges']:
-            print(f'<{edge["kind"]}> ', end='')
-            print(f'[{path_data["nodes"][edge["target"]]["label"]}] ', end='')
+            print(f'{CYAN}<{edge["kind"]}>{RESET} ', end='')
+            print(f'{MAGENTA}[{path_data["nodes"][edge["target"]]["label"]}]{RESET} ', end='')
         print('')   # Get fresh line
 
         return
