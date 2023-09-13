@@ -331,7 +331,7 @@ class Client(object):
             with open(destination, 'r') as file:
                 destinations.extend(file.read().splitlines())
         else:
-            destinations.append(source)
+            destinations.append(destination)
 
         for source in sources:
             for destination in destinations:
@@ -348,7 +348,7 @@ class Client(object):
                         print(f'{YELLOW}        Name:                 {r["name"]}{RESET}')
                         print(f'{YELLOW}        Distinguished Name:   {r["distinguishedname"]}{RESET}')
                 src_sid = search_results_src["data"][0]["objectid"]
-                #print(f'[*] Found source {search_results_src["data"][0]["type"]} "{search_results_src["data"][0]["name"]}" with SID "{src_sid}" for: "{source}"')
+                print(f'[*] Found source {search_results_src["data"][0]["type"]} "{search_results_src["data"][0]["name"]}" with SID "{src_sid}" for: "{source}"')
                 search_results_dst = self.object_search(destination)
                 if len(search_results_dst['data']) == 0:
                     print(f'{RED}[-] Searching for {destination} failed - No results! Try again.{RESET}')
@@ -360,7 +360,7 @@ class Client(object):
                         print(f'{YELLOW}        Name:                 {r["name"]}{RESET}')
                         print(f'{YELLOW}        Distinguished Name:   {r["distinguishedname"]}{RESET}')
                 dst_sid = search_results_dst["data"][0]["objectid"]
-                #print(f'[*] Found destination {search_results_dst["data"][0]["type"]} "{search_results_dst["data"][0]["name"]}" with SID "{dst_sid}" for: "{destination}"')
+                print(f'[*] Found destination {search_results_dst["data"][0]["type"]} "{search_results_dst["data"][0]["name"]}" with SID "{dst_sid}" for: "{destination}"')
                 print("")
 
                 ## Query the shortest path!!
