@@ -39,7 +39,47 @@ $ python3 release_the_hounds.py upload -l 20230907112428_BloodHound.zip
 ```
 
 ```
+$ python3 release_the_hounds.py query -s mayhem@absalom.org -d "domain admins@absalom.org"
 
+
+          __________       .__                                  
+          \______   \ ____ |  |   ____ _____    ______ ____   
+           |       __/ __ \|  | _/ __ \\__  \  /  ____/ __ \  
+           |    |   \  ___/|  |_\  ___/ / __ \_\___ \\  ___/  
+           |____|_  /\___  |____/\___  (____  /____  >\___  > 
+                  \/     \/          \/     \/     \/     \/  
+      __  .__               ___ ___                         .___      
+    _/  |_|  |__   ____    /   |   \  ____  __ __  ____   __| _/______
+    \   __|  |  \_/ __ \  /    ~    \/  _ \|  |  \/    \ / __ |/  ___/
+     |  | |   Y  \  ___/  \    Y    (  <_> |  |  |   |  / /_/ |\___ \ 
+     |__| |___|  /\___  >  \___|_  / \____/|____/|___|  \____ /____  >
+               \/     \/         \/                   \/     \/    \/ 
+
+    
+[*] Querying BHCE for attack paths!
+[*] #######################################################################
+[*] -=-=-=-=-=-=-=-=- Initiating the BloodHound CE client -=-=-=-=-=-=-=-=-
+[*] Connecting to: https://bloodhound.absalom.org:443
+[*] Testing credentials by getting API version ...
+[+] Successfully authenticated to the API! Version: v2 - Server version: v5.0.0
+
+[*] QUERYING ATTACK PATHS FROM "MAYHEM@ABSALOM.ORG" TO "DOMAIN ADMINS@ABSALOM.ORG" ->
+[MAYHEM@ABSALOM.ORG] 
+  ^- <MemberOf> : 
+[RDP@ABSALOM.ORG] 
+  ^- <CanRDP> : 
+[BARDPC.ABSALOM.ORG] 
+  ^- <HasSession> : 
+[THEBARD@ABSALOM.ORG] 
+  ^- <MemberOf> : 
+[HELPDESKADMINS@ABSALOM.ORG] 
+  ^- <GenericAll> : 
+[WIZARDVM.ABSALOM.ORG] 
+  ^- <HasSession> : 
+[THEWIZARD@ABSALOM.ORG] 
+  ^- <MemberOf> : 
+[DOMAIN ADMINS@ABSALOM.ORG] 
+```
 ```
 
 ## Installation

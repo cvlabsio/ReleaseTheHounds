@@ -335,7 +335,7 @@ class Client(object):
 
         for source in sources:
             for destination in destinations:
-                print(f'[*] Getting paths to {destination}')
+                #print(f'[*] Getting paths to {destination}')
                 # Find SID for source
                 search_results_src = self.object_search(source)
                 if len(search_results_src['data']) == 0:
@@ -368,11 +368,12 @@ class Client(object):
                 shortest_path_results = self.query_attack_path(src_sid, dst_sid, exclude_relationships)
                 try:
                     path_data = shortest_path_results['data']
-                    print(f'[+] Attack path found for {path_data["nodes"][path_data["edges"][0]["source"]]["label"]}!')
-                    print(f'{BOLD}{MAGENTA}[{path_data["nodes"][path_data["edges"][0]["source"]]["label"]}]{RESET} ', end='')
+                    #print(f'[+] Attack path found for {path_data["nodes"][path_data["edges"][0]["source"]]["label"]}!')
+                    #print(f'{BOLD}{MAGENTA}[{path_data["nodes"][path_data["edges"][0]["source"]]["label"]}]{RESET} ', end='')
+                    print(f'{BOLD}{MAGENTA}[{path_data["nodes"][path_data["edges"][0]["source"]]["label"]}]{RESET} ')
                     for edge in path_data['edges']:
-                        print(f'{BOLD}{CYAN}<{edge["kind"]} ->{RESET} ', end='')
-                        print(f'{MAGENTA}[{path_data["nodes"][edge["target"]]["label"]}]{RESET} ', end='')
+                        print(f'{BOLD}{CYAN}  ^- <{edge["kind"]}> :{RESET} ')
+                        print(f'{MAGENTA}[{path_data["nodes"][edge["target"]]["label"]}]{RESET} ')
                         if path_data["nodes"][edge["target"]]["objectId"] == dst_sid:
                             # EXPERIMENTAL!
                             # If we hit the "end" node, break the loop so we don't print extraneous edges.
