@@ -5,7 +5,7 @@ import base64
 import json
 import requests, urllib3
 import urllib.parse
-import datetime, time
+import os, datetime, time
 
 from typing import Optional
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
@@ -238,7 +238,7 @@ class Client(object):
             # Request was successful. Returns 200 if there's a result or not
             return r.json()
         else:
-            print(f'[!] Request failed with a {r.status_code}! Behavior will be unexpected...')
+            #print(f'[!] Request failed with a {r.status_code}! Behavior will be unexpected...')
             return r.json()
 
 
@@ -300,7 +300,7 @@ class Client(object):
             # Upload now
             r = self._request('POST', f'/api/v2/file-upload/{job_id}', body=bhchunk_data_bytes)
             if r.status_code != 202:
-                print(f'[-] Issue uploading data with status code: {r.status_code}')
+                print(f'{RED}[-] Issue uploading data with status code: {r.status_code}{RESET}')
             chunk_count += 1
 
         # Ended chunky upload. Now we stop the last job and wrap it up.
@@ -318,48 +318,68 @@ class Client(object):
                 - Resolve the SID with "search" API for source/dest
                 - Query for attack paths & return results
         '''
-        print(f'[*] Getting paths to {destination}')
-        # Find SID for source
-        search_results_src = self.object_search(source)
-        if len(search_results_src['data']) == 0:
-            print(f'[-] Searching for {source} failed - No results! Try again.')
-            exit()
-        elif len(search_results_src['data']) > 1:
-            print(f'[*] Searching for {source} yielded more than 1 result! Using first: {search_results_src["data"][0]["name"]}')
-            print(f'    All matches:')
-            for r in search_results_src['data']:
-                print(f'        Name:                 {r["name"]}')
-                print(f'        Distinguished Name:   {r["distinguishedname"]}')
-        src_sid = search_results_src["data"][0]["objectid"]
-        print(f'[*] Found source {search_results_src["data"][0]["type"]} "{search_results_src["data"][0]["name"]}" with SID "{src_sid}" for: "{source}"')
 
-        search_results_dst = self.object_search(destination)
-        if len(search_results_dst['data']) == 0:
-            print(f'[-] Searching for {destination} failed - No results! Try again.')
-            exit()
-        elif len(search_results_dst['data']) > 1:
-            print(f'[*] Search yielded more than 1 result! Using first: {search_results_dst["data"][0]["name"]}')
-            print(f'    All matches:')
-            for r in search_results_dst['data']:
-                print(f'        Name:                 {r["name"]}')
-                print(f'        Distinguished Name:   {r["distinguishedname"]}')
-        dst_sid = search_results_dst["data"][0]["objectid"]
-        print(f'[*] Found destination {search_results_dst["data"][0]["type"]} "{search_results_dst["data"][0]["name"]}" with SID "{dst_sid}" for: "{destination}"')
+        ## Check if it's a file with values. If not, just one.
+        sources = []
+        if os.path.isfile(source):
+            with open(source, 'r') as file:
+                sources.extend(file.read().splitlines())
+        else:
+            sources.append(source)
+        destinations = []
+        if os.path.isfile(destination):
+            with open(destination, 'r') as file:
+                destinations.extend(file.read().splitlines())
+        else:
+            destinations.append(source)
 
-        ## Query the shortest path!!
-        print(f'{BOLD}{RED}[*] <-=-=-=-=-=-=-=-=-=-=-=- QUERYING ATTACK PATHS -=-==-=-=-=-=-=--=-=-=->{RESET}')
-        shortest_path_results = self.query_attack_path(src_sid, dst_sid, exclude_relationships)
-        try:
-            path_data = shortest_path_results['data']
-            print(f'[+] Attack path found for {path_data["nodes"][path_data["edges"][0]["source"]]["label"]}!')
-            print(f'{BOLD}{MAGENTA}[{path_data["nodes"][path_data["edges"][0]["source"]]["label"]}]{RESET} ', end='')
-            for edge in path_data['edges']:
-                print(f'{BOLD}{CYAN}<{edge["kind"]}>{RESET} ', end='')
-                print(f'{MAGENTA}[{path_data["nodes"][edge["target"]]["label"]}]{RESET} ', end='')
-            print('')   # Get fresh line to clear it
-        except:
-            print(f'[-] No attack paths found!')
+        for source in sources:
+            for destination in destinations:
+                print(f'[*] Getting paths to {destination}')
+                # Find SID for source
+                search_results_src = self.object_search(source)
+                if len(search_results_src['data']) == 0:
+                    print(f'{RED}[-] Searching for {source} failed - No results! Try again.{RESET}')
+                    exit()
+                elif len(search_results_src['data']) > 1:
+                    print(f'{YELLOW}[*] Searching for {source} yielded more than 1 result! Using first: {search_results_src["data"][0]["name"]}{RESET}')
+                    print(f'{YELLOW}    All matches:{RESET}')
+                    for r in search_results_src['data']:
+                        print(f'{YELLOW}        Name:                 {r["name"]}{RESET}')
+                        print(f'{YELLOW}        Distinguished Name:   {r["distinguishedname"]}{RESET}')
+                src_sid = search_results_src["data"][0]["objectid"]
+                #print(f'[*] Found source {search_results_src["data"][0]["type"]} "{search_results_src["data"][0]["name"]}" with SID "{src_sid}" for: "{source}"')
+                search_results_dst = self.object_search(destination)
+                if len(search_results_dst['data']) == 0:
+                    print(f'{RED}[-] Searching for {destination} failed - No results! Try again.{RESET}')
+                    exit()
+                elif len(search_results_dst['data']) > 1:
+                    print(f'{YELLOW}[*] Search yielded more than 1 result! Using first: {search_results_dst["data"][0]["name"]}{RESET}')
+                    print(f'{YELLOW}    All matches:{RESET}')
+                    for r in search_results_dst['data']:
+                        print(f'{YELLOW}        Name:                 {r["name"]}{RESET}')
+                        print(f'{YELLOW}        Distinguished Name:   {r["distinguishedname"]}{RESET}')
+                dst_sid = search_results_dst["data"][0]["objectid"]
+                #print(f'[*] Found destination {search_results_dst["data"][0]["type"]} "{search_results_dst["data"][0]["name"]}" with SID "{dst_sid}" for: "{destination}"')
+                print("")
 
-        print('')
+                ## Query the shortest path!!
+                print(f'{BOLD}{CYAN}[*] QUERYING ATTACK PATHS FROM "{search_results_src["data"][0]["name"]}" TO "{search_results_dst["data"][0]["name"]}" ->{RESET}')
+                shortest_path_results = self.query_attack_path(src_sid, dst_sid, exclude_relationships)
+                try:
+                    path_data = shortest_path_results['data']
+                    print(f'[+] Attack path found for {path_data["nodes"][path_data["edges"][0]["source"]]["label"]}!')
+                    print(f'{BOLD}{MAGENTA}[{path_data["nodes"][path_data["edges"][0]["source"]]["label"]}]{RESET} ', end='')
+                    for edge in path_data['edges']:
+                        print(f'{BOLD}{CYAN}<{edge["kind"]} ->{RESET} ', end='')
+                        print(f'{MAGENTA}[{path_data["nodes"][edge["target"]]["label"]}]{RESET} ', end='')
+                        if path_data["nodes"][edge["target"]]["objectId"] == dst_sid:
+                            # EXPERIMENTAL!
+                            # If we hit the "end" node, break the loop so we don't print extraneous edges.
+                            break   
+                    print('')   # Get fresh line to clear it
+                except:
+                    print(f'{RED}[-] No attack paths found!{RESET}')
+                print('')
+
         return
-

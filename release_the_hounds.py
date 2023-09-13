@@ -152,17 +152,17 @@ def main():
     # Configure Credentials object for auth
     credentials = Credentials(token_id=BHCE_TOKEN_ID, token_key=BHCE_TOKEN_KEY)
     # Create the client and perform a sample call using token request signing
-    print("[*] #######################################################################")
-    print("[*] -=-=-=-=-=-=-=-=- Initiating the BloodHound CE client -=-=-=-=-=-=-=-=-")
-    print(f'[*] Connecting to: {BHCE_SCHEME}://{BHCE_DOMAIN}:{BHCE_PORT}')
+    print(f"{CYAN}[*] #######################################################################{RESET}")
+    print(f"{CYAN}[*] -=-=-=-=-=-=-=-=- Initiating the BloodHound CE client -=-=-=-=-=-=-=-=-{RESET}")
+    print(f'{CYAN}[*] Connecting to: {BHCE_SCHEME}://{BHCE_DOMAIN}:{BHCE_PORT}{RESET}')
     client = Client(scheme=BHCE_SCHEME, host=BHCE_DOMAIN, port=BHCE_PORT, credentials=credentials)
 
-    print('[*] Testing credentials by getting API version ...')
+    print(f'{MAGENTA}[*] Testing credentials by getting API version ...{RESET}')
     try:
         version = client.get_version()
         print(f'[+] Successfully authenticated to the API! Version: {version.api_version} - Server version: {version.server_version}')
     except:
-        print('[-] Failed to authenticate to the target API. Exiting ...')
+        print(f'{BOLD}{RED}[-] Failed to authenticate to the target API. Exiting ...{RESET}')
         exit()
 
     ### UPLOADING DATA TO API ###
