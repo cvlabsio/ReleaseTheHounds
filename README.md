@@ -1,10 +1,15 @@
 # ReleaseTheHounds
-Tool to upload large datasets and interact with BloodHound CE API. I have encountered issues uploading large files to the API -- this project will take a `.zip` file or a directory of JSON data files from `SharpHound.exe` data collector, split the file into workable chunks, and submit them to the BHCE API for ingestion.
+Tool to interact with BloodHound CE API. 
+
+- [x] **Data upload.** I have encountered issues uploading large files to the API -- this project will take a `.zip` file or a directory of JSON data files from `SharpHound.exe` data collector, split the file into workable chunks, and submit them to the BHCE API for ingestion.
+- [x] **Path querying.** Currently, there is no easy way to mark users as compromised and query attack paths from a list of users. This tool can take in a list of compromised users (e.g., from a password spray) and query for attack paths.
+- [ ] **Raw Cypher querying.** Run a custom cypher query. (TO DO)
+- [ ] **Find alternate attack paths.** Find _as many_ attack paths from a source to a dest as possible/reasonable. Sometimes, the shortest path isn't the easiest to exploit :). (TO DO)
 
 The `api.py` code is built from the [sample API client provided by @SpecterOps](https://support.bloodhoundenterprise.io/hc/en-us/articles/11311053342619-Working-with-the-BloodHound-API). You may find this project helpful to reference or expand upon when interacting with the API.
 
 ```
-$ python3 release_the_hounds.py -l 20230907112428_BloodHound.zip
+$ python3 release_the_hounds.py upload -l 20230907112428_BloodHound.zip
 
           __________       .__                                  
           \______   \ ____ |  |   ____ _____    ______ ____   
@@ -33,6 +38,10 @@ $ python3 release_the_hounds.py -l 20230907112428_BloodHound.zip
 [*] Waiting for Job 45 to finish ingesting...NOM NOM NOM
 ```
 
+```
+
+```
+
 ## Installation
 This project should be easy to install & set up. You may need to install `requests` if you don't already have it. 
 
@@ -44,41 +53,26 @@ python3 ReleaseTheHounds -l <BHCE-SharpHound-zip-file>
 ```
 
 ## Usage
-Provide the file location (`-l`) of eitha a SharpHound `.zip` file (in which case it will be extracted) or a directory with already-extracted JSON files.
+- `upload`: Provide the file location (`-l`) of either a SharpHound `.zip` file (in which case it will be extracted) or a directory with already-extracted JSON files.
+- `query`: Queryies BHCE for shortest path from source to dest. Can take in a file of sources (e.g., compromised users) or a file of destinations (e.g., Tier 0 assets or target groups).
 
-```bash
-# Usage
-$ python3 release_the_hounds.py -h
-usage: release_the_hounds.py [-h] -l LOCATION [-u URL] [-k TOKENKEY] [-i TOKENID] [-c CHUNKOBJECTS] [-j CHUNKSINJOB]
-
-Process JSON files in chunks for BHCE and upload via API.
-
-options:
-  -h, --help            show this help message and exit
-  -l LOCATION, --location LOCATION
-                        File system location (zip file or recursively for a directory) of JSON files. Will unzip if needed.
-  -u URL, --url URL     [Can be specified in constants.py.] Base API URL to connect to. Ex. https://bloodhound.absalom.net:443
-  -k TOKENKEY, --tokenkey TOKENKEY
-                        [Can be specified in constants.py.] BloodHound token key (Looks like a B64 blob:
-                        https://support.bloodhoundenterprise.io/hc/en-us/articles/11311053342619-Working-with-the-BloodHound-
-                        API#heading-2)
-  -i TOKENID, --tokenid TOKENID
-                        BloodHound token ID (Looks like a GUID: https://support.bloodhoundenterprise.io/hc/en-
-                        us/articles/11311053342619-Working-with-the-BloodHound-API#heading-2)
-  -c CHUNKOBJECTS, --chunkobjects CHUNKOBJECTS
-                        Number of objects in each chunk (default: 250)
-  -j CHUNKSINJOB, --chunksinjob CHUNKSINJOB
-                        Number of chunks in each job (default: 50)
-```
-
+#### Upload data
 ```bash
 ## Just specify the zip
 ls *.zip
-python3 release_the_hounds.py -l bh.zip
+python3 release_the_hounds.py upload -l bh.zip
 
 ## Specify a folder of JSON files
 ls bloodhounddata/
-python3 release_the_hounds.py -l ./bloodhounddata/
+python3 release_the_hounds.py upload -l ./bloodhounddata/
+```
+
+#### Query Shortest Attack Paths
+```bash
+python3 release_the_hounds.py query -s "domain users@absalom.com" -d "domain admins@absalom.com"  # single objects
+python3 release_the_hounds.py query -s compromised_users.txt -d "domain admins@absalom.com"  # multiple source
+python3 release_the_hounds.py query -s "compromised@absalom.com" -d target_objects.txt    # multiple dest
+python3 release_the_hounds.py query -s password_sprayed_users.txt -d target_objects.txt   # multiple both
 ```
 
 ### Configuring Authentication
