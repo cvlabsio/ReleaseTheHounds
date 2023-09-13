@@ -26,7 +26,7 @@ $ python3 release_the_hounds.py upload -l 20230907112428_BloodHound.zip
 
 <#######################################################################>
 <-=-=-=-=-=-=-=-=- Initiating the BloodHound CE client -=-=-=-=-=-=-=-=->
-[*] Connecting to: https://bloodhound.absalom.com:443
+[*] Connecting to: https://bloodhound.absalom.org:443
 [*] Testing credentials by getting API version ...
 [+] Successfully authenticated to the API! Version: v2 - Server version: v5.0.0
 
@@ -109,9 +109,9 @@ python3 release_the_hounds.py upload -l ./bloodhounddata/
 
 #### Query Shortest Attack Paths
 ```bash
-python3 release_the_hounds.py query -s "domain users@absalom.com" -d "domain admins@absalom.com"  # single objects
-python3 release_the_hounds.py query -s compromised_users.txt -d "domain admins@absalom.com"  # multiple source
-python3 release_the_hounds.py query -s "compromised@absalom.com" -d target_objects.txt    # multiple dest
+python3 release_the_hounds.py query -s "domain users@absalom.org" -d "domain admins@absalom.org"  # single objects
+python3 release_the_hounds.py query -s compromised_users.txt -d "domain admins@absalom.org"  # multiple source
+python3 release_the_hounds.py query -s "compromised@absalom.org" -d target_objects.txt    # multiple dest
 python3 release_the_hounds.py query -s password_sprayed_users.txt -d target_objects.txt   # multiple both
 ```
 
@@ -120,7 +120,7 @@ You have two options to authenticate to the API:
   1. Configure your domain & token info in `constants.py`:
   ```
   api_info = {
-    "BHCE_DOMAIN"    : "bloodhound.absalom.com",
+    "BHCE_DOMAIN"    : "bloodhound.absalom.org",
     "BHCE_PORT"      : 443,
     "BHCE_SCHEME"    : "https",
     "BHCE_TOKEN_ID"  : "4bbe137a-dead-beef-d34d-2dc0ff33aabb",
@@ -129,7 +129,7 @@ You have two options to authenticate to the API:
   ```
   2. Specify in the command line like so:
   ```bash
-  python3 release_the_hounds.py -l ./bh-jsons/ -k "1fLUv3Kbd9CkHe6Ea27bTGP1WF3wk45L63dJFNaaNKfPNbXFa7e3Z2==" -i "4bbe137a-dead-beef-d34d-2dc0ff33aabb" -u https://bloodhound.absalom.com:443
+  python3 release_the_hounds.py -l ./bh-jsons/ -k "1fLUv3Kbd9CkHe6Ea27bTGP1WF3wk45L63dJFNaaNKfPNbXFa7e3Z2==" -i "4bbe137a-dead-beef-d34d-2dc0ff33aabb" -u https://bloodhound.absalom.org:443
   ```
 
 ## Fun GIF
