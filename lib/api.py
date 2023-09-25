@@ -372,7 +372,7 @@ class Client(object):
                     #print(f'{BOLD}{MAGENTA}[{path_data["nodes"][path_data["edges"][0]["source"]]["label"]}]{RESET} ', end='')
                     print(f'{BOLD}{MAGENTA}[{path_data["nodes"][path_data["edges"][0]["source"]]["label"]}]{RESET} ')
                     for edge in path_data['edges']:
-                        print(f'{BOLD}{CYAN}  ^- <{edge["kind"]}> :{RESET} ')
+                        print(f'{BOLD}{CYAN}  ^-<{edge["kind"]}>:{RESET} ')
                         print(f'{MAGENTA}[{path_data["nodes"][edge["target"]]["label"]}]{RESET} ')
                         if path_data["nodes"][edge["target"]]["objectId"] == dst_sid:
                             # EXPERIMENTAL!

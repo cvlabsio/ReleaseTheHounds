@@ -1,5 +1,7 @@
-# Ignore BH data dir
+# Ignore BH data 
 /bloodhounddata/
+*sources.lst
+*dest.lst
 
 # Ignore my creds file so it doesn't upload with git commits
 /lib/constants.py
