@@ -12,13 +12,20 @@ def parse_args():
     subparsers = parser.add_subparsers(dest="action", help="Choose an action: 'upload' or 'query'")
 
     # Subparser for "upload" action
-    upload_parser = subparsers.add_parser("upload", help="Upload data to BHCE.")
+    upload_parser = subparsers.add_parser("upload", help="Upload zip file large data files to BHCE.")
     upload_parser.add_argument('-l', '--location', required=True, help='File system location (zip file or recursively for a directory) of JSON files. Will unzip if needed.')
     upload_parser.add_argument('-u', '--url', type=str, help='[Can be specified in constants.py.] Base API URL to connect to. Ex. https://bloodhound.absalom.net:443')
     upload_parser.add_argument('-k', '--tokenkey', type=str, help='[Can be specified in constants.py.] BloodHound token key  (Looks like a B64 blob: https://support.bloodhoundenterprise.io/hc/en-us/articles/11311053342619-Working-with-the-BloodHound-API#heading-2)')
     upload_parser.add_argument('-i', '--tokenid', type=str, help='BloodHound token ID  (Looks like a GUID: https://support.bloodhoundenterprise.io/hc/en-us/articles/11311053342619-Working-with-the-BloodHound-API#heading-2)')
     upload_parser.add_argument('-c', '--chunkobjects', type=int, default=250, help='Number of objects in each chunk (default: 250)')
     upload_parser.add_argument('-j', '--chunksinjob', type=int, default=50, help='Number of chunks in each job (default: 50)')
+
+    # Subparser for "ingest" to get raw json data
+    ingest_parser = subparsers.add_parser("ingest", help="Upload data to BHCE's /api/v2/ingest endpoint.")
+    ingest_parser.add_argument('-u', '--url', type=str, help='[Can be specified in constants.py.] Base API URL to connect to. Ex. https://bloodhound.absalom.net:443')
+    ingest_parser.add_argument('-k', '--tokenkey', type=str, help='[Can be specified in constants.py.] BloodHound token key  (Looks like a B64 blob: https://support.bloodhoundenterprise.io/hc/en-us/articles/11311053342619-Working-with-the-BloodHound-API#heading-2)')
+    ingest_parser.add_argument('-i', '--tokenid', type=str, help='BloodHound token ID  (Looks like a GUID: https://support.bloodhoundenterprise.io/hc/en-us/articles/11311053342619-Working-with-the-BloodHound-API#heading-2)')
+    ingest_parser.add_argument('-f', '--file', required=True, help='File of JSON data to upload for ingestion.')
 
     # Subparser for "query" action
     query_parser = subparsers.add_parser("query", help="Query BloodHound for attack paths. Takes in source and destination nodes.")
@@ -122,6 +129,8 @@ def main():
 
     if args.action == "upload":
         print('[*] Uploading files to BHCE!')
+    if args.action == "ingest":
+        print('[*] Sending data to ingest API!')
     elif args.action == "query":
         print('[*] Querying BHCE for attack paths!')
     else:
@@ -174,6 +183,9 @@ def main():
             print(f'[*] LOADING SHARPHOUND DATA FILE: {f} -->')
             bhjson = load_file(f) 
             client.chunk_and_submit_data(data_to_chunk=bhjson, num_objs_in_chunk=chunk_object_count, num_chunks_per_job=num_chunks_per_job)
+    elif args.action == 'ingest':
+        data_to_ingest = load_file(args.file)
+        client.send_to_ingest(data_to_ingest)
     ### QUERYING THE API FOR ATTACK PATHS ##
     elif args.action == 'query':
         client.get_attack_paths(args.source, args.dest, args.exclude)

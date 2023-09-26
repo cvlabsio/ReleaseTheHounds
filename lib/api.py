@@ -203,6 +203,21 @@ class Client(object):
             time.sleep(3)
         print(f'[*] Job {job_id} now has status code: {job_status_code} {job_status["status_message"]}')
         return
+
+
+    def send_to_ingest(self, data):
+        '''
+        Posts data to the /api/v2/ingest endpoint
+        '''
+        print(f'[*] Sending data for ingestion!')
+        # Convert the ingest data to a JSON string
+        data_string = json.dumps(data)
+        # Encode the JSON data string to bytes
+        data_bytes = data_string.encode('utf-8')
+        r = self._request('POST', '/api/v2/ingest', body=data_bytes)
+        print(r.status_code)
+        print(r.content)
+        return
         
     
     def object_search(self, searchobj) -> dict:
@@ -309,7 +324,7 @@ class Client(object):
         print(f'[+] Uploaded {chunk_count} chunks of {num_objs_in_chunk} objects each to API.')
         return
 
-    
+
     def get_attack_paths(self, source, destination, exclude_relationships):
         '''
         Takes a source node and identifies attack paths to destination node.
