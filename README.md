@@ -80,7 +80,6 @@ $ python3 release_the_hounds.py query -s mayhem@absalom.org -d "domain admins@ab
   ^- <MemberOf> : 
 [DOMAIN ADMINS@ABSALOM.ORG] 
 ```
-```
 
 ## Installation
 This project should be easy to install & set up. You may need to install `requests` if you don't already have it. 
